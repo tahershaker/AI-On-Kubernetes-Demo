@@ -14,6 +14,12 @@ This is for demo purposes only. **Do not use this in a production environment.**
 
 ---
 
+## Architecture 
+
+![hl-arc](/Image/hl-arch.png)
+
+---
+
 ## Environment
 
 | Node | Role | Hostname |
@@ -56,7 +62,7 @@ fi
 exec bash
 ```
 
-📸 *Screenshot placeholder*
+![step1](/01-Install-Kubernetes/Image/step-1.png)
 
 ---
 
@@ -74,8 +80,6 @@ fi
 exec bash
 ```
 
-📸 *Screenshot placeholder*
-
 ---
 
 ### Step 3 — Set the hostname on the GPU worker node
@@ -92,8 +96,6 @@ fi
 exec bash
 ```
 
-📸 *Screenshot placeholder*
-
 ---
 
 ### Step 4 — Create the RKE2 config file on the master node
@@ -103,7 +105,7 @@ On the master node:
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
 write-kubeconfig-mode: "0644"
-node-name: kube-ai-demo-master-01
+node-name: <Node_FQDN>
 cni: "calico"
 cluster-cidr: "172.16.0.0/16"
 service-cidr: "172.17.0.0/16"
@@ -111,7 +113,7 @@ token: AiDemoRKE2token!!5s84s9f9e3d2f2x3f1
 EOF
 ```
 
-📸 *Screenshot placeholder*
+![step4](/01-Install-Kubernetes/Image/step-4.png)
 
 ---
 
@@ -122,13 +124,11 @@ On the non-GPU worker node, replace `<MASTER_PRIVATE_IP>` with the master node's
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
 write-kubeconfig-mode: "0644"
-node-name: kube-ai-demo-worker-no-gpu-01
+node-name: <Node_FQDN>
 server: https://<MASTER_PRIVATE_IP>:9345
 token: AiDemoRKE2token!!5s84s9f9e3d2f2x3f1
 EOF
 ```
-
-📸 *Screenshot placeholder*
 
 ---
 
@@ -139,13 +139,11 @@ On the GPU worker node, replace `<MASTER_PRIVATE_IP>` with the master node's pri
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
 write-kubeconfig-mode: "0644"
-node-name: kube-ai-demo-worker-gpu-02
+node-name: <Node_FQDN>
 server: https://<MASTER_PRIVATE_IP>:9345
 token: AiDemoRKE2token!!5s84s9f9e3d2f2x3f1
 EOF
 ```
-
-📸 *Screenshot placeholder*
 
 ---
 
@@ -157,7 +155,7 @@ On the master node:
 curl -sfL https://get.rke2.io | sudo sh -
 ```
 
-📸 *Screenshot placeholder*
+![step7](/01-Install-Kubernetes/Image/step-7.png)
 
 ---
 
@@ -171,7 +169,7 @@ sudo systemctl enable rke2-server.service --now
 
 This can take a few minutes — Step 10 confirms it's ready.
 
-📸 *Screenshot placeholder*
+![step8](/01-Install-Kubernetes/Image/step-8.png)
 
 ---
 
@@ -183,7 +181,7 @@ On the master node:
 mkdir -p ~/.kube && sudo cp /etc/rancher/rke2/rke2.yaml ~/.kube/config && sudo chown $(id -u):$(id -g) ~/.kube/config && echo 'export PATH=$PATH:/var/lib/rancher/rke2/bin' >> ~/.bashrc && exec bash
 ```
 
-📸 *Screenshot placeholder*
+![step9](/01-Install-Kubernetes/Image/step-9.png)
 
 ---
 
@@ -197,7 +195,7 @@ kubectl get nodes
 
 You should see `kube-ai-demo-master-01` in `Ready` state.
 
-📸 *Screenshot placeholder*
+![step10](/01-Install-Kubernetes/Image/step-10.png)
 
 ---
 
@@ -209,7 +207,7 @@ On the non-GPU worker node:
 curl -sfL https://get.rke2.io | sudo INSTALL_RKE2_TYPE="agent" sh -
 ```
 
-📸 *Screenshot placeholder*
+![step11](/01-Install-Kubernetes/Image/step-11.png)
 
 ---
 
@@ -221,7 +219,7 @@ On the non-GPU worker node:
 sudo systemctl enable rke2-agent.service --now
 ```
 
-📸 *Screenshot placeholder*
+![step12](/01-Install-Kubernetes/Image/step-12.png)
 
 ---
 
@@ -233,8 +231,6 @@ On the GPU worker node:
 curl -sfL https://get.rke2.io | sudo INSTALL_RKE2_TYPE="agent" sh -
 ```
 
-📸 *Screenshot placeholder*
-
 ---
 
 ### Step 14 — Start RKE2 on the GPU worker node
@@ -244,8 +240,6 @@ On the GPU worker node:
 ```bash
 sudo systemctl enable rke2-agent.service --now
 ```
-
-📸 *Screenshot placeholder*
 
 ---
 
@@ -259,16 +253,29 @@ kubectl get nodes
 
 All 3 nodes should show, in `Ready` state: `kube-ai-demo-master-01`, `kube-ai-demo-worker-no-gpu-01`, `kube-ai-demo-worker-gpu-02`.
 
-📸 *Screenshot placeholder*
+![step15](/01-Install-Kubernetes/Image/step-15.png)
 
 ---
 
 ### Step 16 — Label the non-GPU worker node
 
-This pins non-GPU workloads to the non-GPU worker, keeping the GPU worker free for GPU workloads. On the master node:
+This label is what lets a non-GPU workload's nodeSelector be pinned to this node, keeping the GPU worker free for GPU workloads — the label on its own does nothing until a pod spec selects it. On the master node:
 
 ```bash
 kubectl label node kube-ai-demo-worker-no-gpu-01 workload-type=non-gpu
+kubectl get node kube-ai-demo-worker-no-gpu-01 --show-labels
 ```
 
-📸 *Screenshot placeholder*
+*Note: The label alone does not move anything — it just tags the node. The pinning happens on the workload side: any deployment or pod that includes nodeSelector: { workload-type: non-gpu } in its spec will only be scheduled onto this node. Demos in this repo that deploy non-GPU workloads will use this selector to keep them off the GPU node.*
+
+![step16](/01-Install-Kubernetes/Image/step-16.png)
+
+---
+
+## Next Action
+
+Kubernetes is now up and running on all 3 nodes. You can start the demos — refer to the [02-Demos README](/02-Demos/README.md).
+
+---
+
+Enjoy
