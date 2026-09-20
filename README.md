@@ -22,7 +22,7 @@ This is for demo purposes only — not intended for production use. **Do not use
 
 The demos run on a 3-node Kubernetes cluster (1 master, 1 non-GPU worker, 1 GPU worker) provisioned on **Nebius Cloud**. Provisioning the VMs is out of scope for this repo.
 
-You can use Nebius or a different cloud. If you use a different cloud, you will need to adjust the code, commands, and files provided here to match it.
+You can use **Nebius** or a different cloud. If you use a different cloud, you will need to adjust the code, commands, and files provided here to match it.
 
 ---
 
