@@ -28,7 +28,7 @@ You can use **Nebius** or a different cloud. If you use a different cloud, you w
 
 ## Architecture 
 
-[hl-arc](/Image/hl-arch.png)
+![hl-arc](/Image/hl-arch.png)
 
 ---
 
