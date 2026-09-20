@@ -272,6 +272,18 @@ kubectl get node kube-ai-demo-worker-no-gpu-01 --show-labels
 
 ---
 
+### Step 17 — Install Helm on the master node
+
+You'll need Helm for demos that deploy via Helm charts (e.g. the GPU Operator). On the master node:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o get_helm.sh && chmod +x get_helm.sh && ./get_helm.sh && rm -f get_helm.sh
+```
+
+![step17](/01-Install-Kubernetes/Image/step-17.png)
+
+---
+
 ## Next Action
 
 Kubernetes is now up and running on all 3 nodes. You can start the demos — refer to the [02-Demos README](/02-Demos/README.md).
