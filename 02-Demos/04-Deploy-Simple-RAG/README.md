@@ -36,6 +36,23 @@ All 3 nodes should show `Ready`.
 
 ---
 
+## Before We Start — Confirm the base model has no knowledge of AI-Demo-Lab
+
+Before building anything, it's worth showing the starting point: the vLLM model deployed in [03-Deploy-vLLM-OpenWebUI](/02-Demos/03-Deploy-vLLM-OpenWebUI/README.md) has no knowledge of this fictional company, since it was never trained or given any information about it. This is the "before" this demo compares against.
+
+Open OpenWebUI (already deployed in demo 03) at: `http://<worker-no-gpu-01-public-ip>:30080`
+
+Make sure `qwen2.5-7b` is selected in the model dropdown, then ask:
+
+`How many days of paid annual leave do employees get?`
+
+
+The model has nothing to answer this question with — it doesn't know which company you mean, and even if you name AI-Demo-Lab explicitly, it has no data about it. Expect either a request for clarification or a generic, made-up answer, not the real figure (25 days). Keep this in mind — the same question gets asked again later, once retrieval is wired in, and the answer should then be grounded and correct.
+
+![step0](/02-Demos/04-Deploy-Simple-RAG/Image/step-0.png)
+
+---
+
 ## How to Use
 
 ### Step 1 — Create the namespace
