@@ -1,0 +1,239 @@
+SECTION 1: COMPANY OVERVIEW
+
+AI-Demo-Lab is a fictional cloud and artificial intelligence infrastructure company created for demonstration and testing purposes. It does not represent a real business, and none of the facts, figures, or policies in this document describe any real organization.
+
+AI-Demo-Lab was founded in 2019 in the city of Meridian Bay, a fictional coastal technology hub. The company started as a three-person team building GPU scheduling tools for research labs, and grew into a mid-sized company offering managed AI infrastructure, model hosting, and applied AI consulting to enterprise customers.
+
+As of the most recent internal headcount report, AI-Demo-Lab employs 480 people across four offices: Meridian Bay (headquarters), Port Callan, Ashwell, and a remote-first engineering hub with no fixed office location. The company operates in three main business lines: Infrastructure Services, Model Hosting and Inference, and Applied AI Consulting.
+
+AI-Demo-Lab's fiscal year runs from 1 April to 31 March. The company is privately held and has completed three funding rounds: a seed round in 2019, a Series A in 2021, and a Series B in 2023.
+
+The company's registered legal name is AI-Demo-Lab Technologies Ltd. Its primary data centre partner is a fictional cloud provider referred to internally as "Northfield Cloud." AI-Demo-Lab does not own physical data centre hardware; all compute infrastructure is leased from Northfield Cloud and from two secondary providers used for burst capacity.
+
+The executive leadership team consists of five people: the Chief Executive Officer, the Chief Technology Officer, the Chief Financial Officer, the Chief People Officer, and the Chief Revenue Officer. The current CEO is the company's co-founder and has held the role since 2019.
+
+AI-Demo-Lab's customers range from early-stage startups to large enterprises in the financial services, healthcare, and retail sectors. The company reports that roughly 60 percent of its revenue comes from its top 20 customer accounts, which is a concentration risk the company has flagged internally as a strategic priority to reduce over the next three fiscal years.
+
+AI-Demo-Lab's headquarters in Meridian Bay houses approximately 160 employees and includes the company's only on-site data centre lab, a small physical rack used purely for internal testing of new hardware before it is deployed with Northfield Cloud at production scale. The Port Callan office focuses primarily on Customer Success and Sales, while the Ashwell office is home to most of the Applied AI Consulting team due to its proximity to several long-standing enterprise customers in that region.
+
+The company's fiscal year 2025 annual report, shared internally with all employees, disclosed that AI-Demo-Lab crossed 100 million USD in annual recurring revenue for the first time, with the Model Hosting and Inference product line contributing the largest share of new revenue growth. The company has stated a public goal of reaching profitability by the end of fiscal year 2027.
+
+AI-Demo-Lab holds ISO 27001 certification, renewed annually, and undergoes an independent SOC 2 Type II audit each fiscal year. Both certifications are referenced frequently in customer security questionnaires and are managed jointly by the Security team and the Legal team.
+
+---
+
+SECTION 2: MISSION, VISION AND VALUES
+
+AI-Demo-Lab's stated mission is: "To make production-grade AI infrastructure accessible to teams of any size, without requiring them to become infrastructure experts."
+
+The company's vision statement, as published in its internal onboarding materials, is: "A world where deploying a well-governed AI system takes days, not quarters."
+
+AI-Demo-Lab defines four core values that guide internal decision-making:
+
+1. Transparency by default. Internal documentation, architecture decisions, and incident postmortems are visible to all employees unless there is a specific legal or security reason to restrict access. Customer-facing transparency includes publishing a public status page and quarterly reliability reports.
+
+2. Bias toward reversible decisions. Teams are encouraged to make fast decisions when the decision can be reversed cheaply, and to slow down and seek broader review only when a decision is expensive or difficult to undo.
+
+3. Own the outcome, not just the task. Employees are expected to follow through on the end result of their work, including its downstream effects on other teams and on customers, rather than considering a task complete once their individual piece is finished.
+
+4. Sustainable pace. AI-Demo-Lab explicitly discourages routine overtime and considers sustained overtime a signal of a staffing or planning problem to be corrected, not a sign of commitment to reward.
+
+These values are reviewed annually by the executive team and were last updated in the 2025 fiscal year, when "Sustainable pace" was added in response to employee survey feedback about burnout in the Infrastructure Services division.
+
+Each value is paired with a short set of behaviors that managers are trained to look for during performance reviews. For "Transparency by default," this includes whether an engineer writes an accessible design document before starting significant work, rather than after the fact. For "Own the outcome, not just the task," this includes whether an employee follows up on a customer-reported issue until it is genuinely resolved, rather than closing their part of a ticket and moving on.
+
+AI-Demo-Lab runs an anonymous engagement survey twice a year, in March and September. Results are shared company-wide within two weeks of the survey closing, broken down by department but not by individual team, to protect anonymity in smaller teams. The most recent survey reported an overall engagement score of 7.6 out of 10, with the lowest scores concentrated in questions about workload predictability within the Infrastructure Services division.
+
+---
+
+SECTION 3: PRODUCTS AND SERVICES
+
+AI-Demo-Lab organizes its offering into three product lines.
+
+Infrastructure Services provides managed Kubernetes clusters pre-configured for GPU workloads, including GPU Operator management, MIG partitioning, and node lifecycle automation. Customers can provision clusters through a self-service portal or through a dedicated solutions architect for larger deployments. This is the company's oldest and highest-margin product line.
+
+Model Hosting and Inference is a managed service for deploying and serving machine learning models, including large language models, at scale. It includes autoscaling inference endpoints, model version management, and usage-based billing. This product line uses vLLM and similar open-source inference engines under the hood, and it is the fastest-growing product line by revenue, growing 140 percent year over year in the most recent fiscal year.
+
+Applied AI Consulting is a services engagement model where AI-Demo-Lab's solution architects and applied scientists work directly with a customer's team to design, build, and hand over a specific AI system, such as a document processing pipeline or a retrieval-augmented question-answering system. Consulting engagements typically run between 8 and 16 weeks and are billed on a fixed-fee or time-and-materials basis depending on the customer's preference.
+
+AI-Demo-Lab does not build or sell its own foundation models. It positions itself as infrastructure- and integration-focused, and it partners with several open-model providers rather than competing with them.
+
+The company's standard customer-facing Service Level Agreement, described in more detail in Section 10, guarantees 99.9 percent uptime for Tier 1 customers on the Infrastructure Services and Model Hosting product lines.
+
+Within Infrastructure Services, the most commonly purchased package is the "Managed GPU Cluster" tier, which includes cluster provisioning, GPU Operator lifecycle management, and MIG configuration support, but does not include model-level optimization work; that is scoped separately under Model Hosting or Applied AI Consulting. Customers on the Managed GPU Cluster package receive a dedicated Slack Connect channel with the Platform Engineering on-call rotation during their first 90 days.
+
+Model Hosting and Inference bills customers on a combination of a fixed monthly platform fee and usage-based compute charges, calculated per GPU-hour consumed by the customer's deployed models. AI-Demo-Lab publishes indicative GPU-hour pricing on its website but negotiates committed-use discounts for customers who commit to a minimum monthly spend.
+
+Applied AI Consulting engagements always conclude with a formal handover package, consisting of architecture documentation, a runbook for common operational tasks, and a recorded knowledge-transfer session with the customer's engineering team. AI-Demo-Lab does not retain ongoing operational responsibility for a consulting deliverable once the handover package has been accepted by the customer, unless a separate managed-service contract is signed.
+
+---
+
+SECTION 4: ORGANIZATIONAL STRUCTURE
+
+AI-Demo-Lab is organized into six functional departments: Engineering, Product, Sales, Customer Success, People Operations, and Finance.
+
+Engineering is the largest department, with approximately 210 employees, and is split into four sub-teams: Platform Engineering (Kubernetes and GPU infrastructure), Inference Engineering (model serving and optimization), Applied AI (consulting delivery), and Site Reliability Engineering.
+
+Reporting lines follow a standard hierarchy: individual contributors report to a team lead, team leads report to an engineering manager, and engineering managers report to a director, who reports to the Chief Technology Officer.
+
+AI-Demo-Lab uses a job levelling framework with six levels for individual contributors (L1 through L6) and four levels for people managers (M1 through M4). Promotion decisions are made twice per year, in April and October, following a calibration process involving each department's leadership team.
+
+The company operates a "dotted line" model for a small number of cross-functional roles, such as Solutions Architects, who report directly to a Sales or Customer Success manager but maintain a secondary reporting relationship to an Engineering director for technical mentorship and career development.
+
+New employees are assigned an onboarding buddy for their first 90 days, in addition to their direct manager. The onboarding buddy is a peer at a similar level, not a manager, and is intended to be a low-pressure point of contact for day-to-day questions.
+
+Product is a smaller department of approximately 35 employees, organized around the three product lines described in Section 3, each with a dedicated Product Manager and Product Designer. Product Managers are responsible for the roadmap within their product line but must bring any change affecting the shared platform layer to a monthly cross-product review board before committing to a customer timeline.
+
+Sales and Customer Success together make up approximately 95 employees. Sales is split into New Business and Expansion teams, while Customer Success is organized by account tier, mirroring the support tiers described in Section 10, so that Tier 1 accounts are always served by a Customer Success Manager with enterprise account experience.
+
+People Operations and Finance are the smallest departments, at roughly 20 and 20 employees respectively. People Operations includes a dedicated Learning and Development function responsible for the onboarding buddy program, manager training, and the twice-yearly engagement survey described in Section 2.
+
+---
+
+SECTION 5: REMOTE WORK POLICY
+
+AI-Demo-Lab operates a hybrid work model for employees based near one of its four physical offices, and a fully remote model for employees hired into remote-designated roles.
+
+Hybrid employees are expected to work from their assigned office at least 2 days per week. The specific days are agreed between the employee and their manager and do not need to be the same across a team, though most teams coordinate at least one shared in-office day per week for collaboration.
+
+Core collaboration hours are 10:00 to 16:00 in the employee's local time zone, Monday to Thursday. Employees are expected to be reachable during core hours regardless of whether they are working from home or from the office. Outside of core hours, and on Fridays, employees may set their own schedule as long as they meet their team's agreed commitments.
+
+Employees may request fully remote status even if they live near an office. Fully remote requests require written approval from the employee's manager and from a Vice President in their department, and are reviewed on a case-by-case basis considering the nature of the role and the team's collaboration needs.
+
+Employees working remotely from a location outside their home country for more than 30 consecutive days must notify People Operations in advance, due to tax, payroll, and work-authorization implications. AI-Demo-Lab does not currently support permanent international remote work outside of the countries where it has a registered legal entity.
+
+The company provides a one-time home office stipend of 900 USD (or local currency equivalent) for new hires in hybrid or remote roles, to be spent on desk, chair, or monitor equipment within the first 60 days of employment.
+
+AI-Demo-Lab also provides an ongoing monthly remote work allowance of 50 USD to cover home internet and utility costs, paid automatically alongside salary to any employee whose contract designates them as hybrid or fully remote. This allowance is separate from the one-time stipend and does not require expense submission.
+
+Managers are expected to run at least one fully synchronous team meeting per week, held during core hours, with cameras encouraged but not mandatory. Teams that span more than 3 time zones are permitted to rotate the meeting time so that the same group of employees is not always the one attending outside their normal working hours.
+
+Employees who relocate permanently to a different country must inform their manager and People Operations at least 60 days before the move, since a change of country can affect eligibility for the role, payroll setup, and benefits enrollment. AI-Demo-Lab reserves the right to require an employee to change roles or, in limited cases, to end employment if a relocation is not compatible with the role's legal or operational requirements.
+
+---
+
+SECTION 6: LEAVE AND TIME-OFF POLICY
+
+AI-Demo-Lab provides 25 days of paid annual leave per calendar year for full-time employees, in addition to public holidays observed in the employee's home country. Annual leave accrues monthly and unused leave of up to 5 days may be carried over into the following calendar year; any leave beyond that is forfeited unless local law requires otherwise.
+
+Employees become eligible to take annual leave after completing 30 days of employment, though leave accrues from the first day of employment.
+
+AI-Demo-Lab provides 18 weeks of paid parental leave for the primary caregiver following the birth, surrogacy, or adoption of a child, and 6 weeks of paid parental leave for a secondary caregiver. These entitlements apply regardless of gender and can be taken within the first 12 months following the qualifying event.
+
+Paid sick leave is provided separately from annual leave, at 10 days per calendar year for personal illness. A doctor's note is required only for sick leave taken for more than 3 consecutive days.
+
+Employees are entitled to 3 days of paid bereavement leave for the loss of an immediate family member, extendable to 5 days with manager approval for travel-related circumstances.
+
+AI-Demo-Lab observes a company-wide "quiet week" during the last week of December each year, during which the office is closed and all employees other than a small on-call support rotation are expected to be fully off work. This week does not count against an employee's annual leave balance.
+
+Unused leave is paid out upon termination of employment in jurisdictions where this is legally required; in other jurisdictions, payout is at the company's discretion and is not guaranteed.
+
+Employees may take unpaid leave of up to 4 weeks per calendar year for personal reasons, subject to manager approval and to operational needs at the time of the request. Unpaid leave requests must be submitted at least 4 weeks in advance except in emergencies, and are tracked separately from paid annual leave in the HR system.
+
+AI-Demo-Lab supports a Volunteer Time Off benefit of 2 paid days per calendar year, which employees can use to volunteer with a registered charity of their choice. This benefit does not carry over between calendar years and cannot be combined with annual leave to extend a holiday.
+
+Jury duty, military reserve service, and legally mandated civic duties are covered as fully paid leave for the duration required by law, in addition to and without reducing the employee's annual leave balance.
+
+---
+
+SECTION 7: IT ACCEPTABLE USE AND SECURITY POLICY
+
+All AI-Demo-Lab employees and contractors must use multi-factor authentication (MFA) on every corporate account, including email, source control, and cloud provider consoles. MFA cannot be disabled by an individual employee; only the Security team can grant an exception, and exceptions are logged and reviewed monthly.
+
+Corporate passwords must be at least 14 characters long and must be rotated every 90 days for accounts that do not support single sign-on. Accounts behind the company's single sign-on provider are exempt from the 90-day rotation requirement, since access is governed centrally.
+
+USB mass storage devices are disabled by default on all company-issued laptops. Exceptions require a documented business justification approved by an employee's manager and by IT Security, and are granted for a maximum of 90 days before requiring renewal.
+
+Employees may use personal devices to access corporate email and chat tools, but may not use personal devices to access production infrastructure, customer data, or source code repositories. Access to those systems is restricted to company-managed devices enrolled in the company's device management platform.
+
+All laptops are encrypted at rest by default and are configured to lock automatically after 5 minutes of inactivity. Employees may not disable disk encryption or the automatic lock screen.
+
+Any suspected security incident, including a lost device, a phishing email that was clicked, or unexpected account activity, must be reported to the Security team within 1 hour of discovery through the internal incident channel. AI-Demo-Lab's internal service level target for the Security team is to begin triage within 15 minutes of a report being filed during business hours, and within 30 minutes outside business hours for incidents flagged as high severity.
+
+Use of unsanctioned third-party AI tools with access to company or customer data is not permitted. Employees must use only the AI tools that have been reviewed and approved by IT Security and listed on the internal approved-tools register.
+
+Production infrastructure access is granted through a role-based access control system and is reviewed quarterly by each team's manager, who must actively re-certify every team member's access or it is automatically revoked. Standing access to production customer data is not granted by default to any role; engineers requiring temporary access for debugging must request a time-limited access grant, capped at 8 hours, through the internal access request tool.
+
+All source code changes to production systems require review and approval from at least one other engineer before merging, and changes to security-sensitive components, such as authentication or the access control system itself, require approval from a member of the Security team in addition to a peer reviewer.
+
+Company-issued laptops are refreshed on a 3-year cycle. Employees who leave the company are required to return all company-issued hardware within 5 business days of their last working day; IT Security remotely wipes any device not returned within that window.
+
+---
+
+SECTION 8: DATA GOVERNANCE AND CLASSIFICATION POLICY
+
+AI-Demo-Lab classifies all data into three tiers: Public, Internal, and Confidential.
+
+Public data is information that has been explicitly approved for external release, such as published blog posts, marketing material, and the public status page. Public data requires no special handling.
+
+Internal data is information intended for use within the company but not for external release, such as internal engineering documentation, meeting notes, and non-customer-identifying operational metrics. Internal data may be shared with contractors and vendors only under an active non-disclosure agreement.
+
+Confidential data includes customer data, employee personal data, financial records, and unreleased product plans. Confidential data must be stored only in approved systems, must never be copied to personal devices or personal cloud storage, and access must be granted on a least-privilege, need-to-know basis.
+
+Customer data is retained for 7 years following the end of a customer's contract, after which it is permanently deleted unless a longer retention period is required by law or by a specific contractual agreement with that customer. A customer may request earlier deletion of their data, which the Data Governance team must complete within 30 days of a verified request.
+
+Employee personal data, including payroll and performance records, is retained for the duration of employment plus 6 years, in line with the company's standard record-keeping policy for employment-related disputes.
+
+Any transfer of Confidential data to a new vendor or sub-processor must go through a Data Processing Agreement review by the Legal and Data Governance teams before the transfer takes place. AI-Demo-Lab maintains a public sub-processor list that is updated within 15 days of onboarding a new sub-processor.
+
+Data breaches involving Confidential data must be reported internally within 1 hour of discovery and, where legally required, reported to affected customers within 72 hours of confirmation, in line with the company's regulatory obligations in the jurisdictions where it operates.
+
+AI-Demo-Lab does not use customer data to train shared or general-purpose models. Any use of customer data for model improvement is opt-in only, requires an explicit written agreement with that customer, and results in a dedicated, isolated model that is never shared with other customers.
+
+Backups of Confidential data are encrypted, stored in a region separate from the primary production region, and tested through a full restoration drill on a quarterly basis by the Site Reliability Engineering team. Backup retention follows the same 7-year schedule as the underlying customer data described above.
+
+Employees who no longer require access to a given data set as part of their role have that access automatically revoked as part of the quarterly access review described in Section 7. Data Governance maintains a data access log for all Confidential data, retained for 2 years, which can be audited by Legal or by an external auditor as part of the annual SOC 2 Type II process.
+
+---
+
+SECTION 9: CODE OF CONDUCT
+
+AI-Demo-Lab expects all employees to treat colleagues, customers, and partners with respect, regardless of role, seniority, or background. Harassment, discrimination, and retaliation against anyone who raises a good-faith concern are strict violations of this Code of Conduct and are grounds for disciplinary action up to and including termination.
+
+Employees must disclose any outside business activity, board membership, or financial interest that could reasonably be seen as a conflict of interest with their role at AI-Demo-Lab. Disclosures are reviewed by People Operations and, where relevant, by Legal, and are kept on file for the duration of employment.
+
+Gifts from customers or vendors with a value over 100 USD must be declined or, if declining would be impractical or culturally inappropriate, disclosed to a manager and logged with People Operations. Cash or cash-equivalent gifts of any value must always be declined.
+
+Employees are expected to keep confidential business information confidential both during and after their employment with AI-Demo-Lab, in line with the confidentiality agreement signed at the start of employment.
+
+AI-Demo-Lab prohibits insider trading and any use of non-public information about the company, its customers, or its partners for personal financial gain. This applies to all employees, not only those with direct access to financial data.
+
+Employees who become aware of a violation of this Code of Conduct are encouraged to report it to their manager, to People Operations, or through the anonymous ethics reporting line. Reports made in good faith are protected from retaliation, and AI-Demo-Lab investigates all reports through a documented process managed jointly by People Operations and Legal.
+
+All employees complete mandatory Code of Conduct training within their first 30 days of employment, and a refresher course annually thereafter. Completion is tracked by People Operations, and managers are notified if a direct report has not completed the annual refresher within 30 days of it becoming due.
+
+AI-Demo-Lab prohibits employees from using their position at the company to solicit personal favors, discounts, or preferential treatment from vendors or customers. This includes accepting free or discounted use of a vendor's product for personal purposes in exchange for favorable treatment of that vendor in a business decision.
+
+Substance use policies at AI-Demo-Lab prohibit being under the influence of alcohol or non-prescribed drugs during working hours or while representing the company at a customer or industry event, with the exception of moderate alcohol consumption at company-sanctioned social events outside of working hours.
+
+---
+
+SECTION 10: CUSTOMER SUPPORT AND SLA POLICY
+
+AI-Demo-Lab offers three customer support tiers: Standard, Priority, and Tier 1 (Enterprise).
+
+Standard support is included with all subscriptions and covers business-hours support with a target first-response time of 1 business day for non-urgent issues and 4 business hours for urgent issues.
+
+Priority support is a paid add-on that provides 24-by-5 support coverage, with a target first-response time of 2 hours for urgent issues and 8 hours for non-urgent issues.
+
+Tier 1 (Enterprise) support provides 24-by-7 coverage and is included automatically for customers on an annual contract value above a threshold set by the Sales leadership team. Tier 1 customers are assigned a named Customer Success Manager and a technical point of contact from the Solutions Architecture team.
+
+AI-Demo-Lab's Service Level Agreement for Tier 1 customers guarantees 99.9 percent monthly uptime for the Infrastructure Services and Model Hosting product lines. If this threshold is not met in a given month, the customer is eligible for a service credit calculated as a percentage of that month's fees, on a sliding scale published in the customer's contract.
+
+For incidents classified as Critical (a full or near-full service outage), the internal response time target is to begin investigation within 15 minutes of detection for Tier 1 customers, and to provide a customer-facing update at least every 30 minutes until the incident is resolved or downgraded in severity.
+
+For incidents classified as Critical, the target time to first response communicated to the customer is 4 hours, covering acknowledgement, initial assessment, and a preliminary remediation plan; this is distinct from full resolution, which is tracked separately and does not have a fixed target due to the wide variation in root causes.
+
+All incidents affecting Tier 1 customers require a written postmortem within 5 business days of resolution. The postmortem is shared with the affected customer and, in an anonymized form, with the internal Engineering organization as part of AI-Demo-Lab's "Transparency by default" value described in Section 2.
+
+Customers may request a data export of their account information and usage history at any time through the self-service portal, and AI-Demo-Lab fulfills export requests within 5 business days.
+
+Non-critical incidents, such as degraded performance affecting a single customer without a full outage, follow a separate response track with a first-response target of 1 business hour for Tier 1 customers and 4 business hours for Priority customers. These are tracked in the same incident system as Critical incidents but do not trigger the customer-facing update cadence described above.
+
+AI-Demo-Lab publishes a public status page showing real-time system status for all three product lines, and any incident affecting more than one customer is posted to the status page within 15 minutes of being classified as an active incident, regardless of the affected customers' support tier.
+
+Customers on the Standard support tier are not eligible for financial service credits under the Service Level Agreement, but may escalate a repeated pattern of missed response targets to their account team for review, which can result in a discretionary goodwill credit at the company's sole discretion.
+
+---
+
+END OF DOCUMENT
