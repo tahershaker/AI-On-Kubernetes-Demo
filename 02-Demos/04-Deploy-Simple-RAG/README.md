@@ -590,7 +590,7 @@ kubectl get pods -n simple-rag-demo -l app=rag-api -w
 
 Press `Ctrl+C` once the pod shows `Running`.
 
-![step18](/02-Demos/04-Simple-RAG/Image/step-18.png)
+![step18](/02-Demos/04-Deploy-Simple-RAG/Image/step-18.png)
 
 ---
 
@@ -614,7 +614,7 @@ spec:
 EOF
 ```
 
-![step19](/02-Demos/04-Simple-RAG/Image/step-19.png)
+![step19](/02-Demos/04-Deploy-Simple-RAG/Image/step-19.png)
 
 ---
 
@@ -631,7 +631,7 @@ kubectl run rag-api-test -n simple-rag-demo --rm -it --restart=Never --image=cur
 
 You should see a JSON response whose answer states 25 days — confirming retrieval and generation work end to end before wiring this into OpenWebUI.
 
-![step20](/02-Demos/04-Simple-RAG/Image/step-20.png)
+![step20](/02-Demos/04-Deploy-Simple-RAG/Image/step-20.png)
 
 ---
 
