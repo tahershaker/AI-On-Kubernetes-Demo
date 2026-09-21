@@ -285,7 +285,7 @@ On the master node:
 kubectl get nodes
 ```
 
-All 3 nodes should show, in `Ready` state: `kube-ai-demo-master-01`, `kube-ai-demo-worker-no-gpu-01`, `kube-ai-demo-worker-gpu-02`.
+> All 3 nodes should show, in `Ready` state: `kube-ai-demo-master-01`, `kube-ai-demo-worker-no-gpu-01`, `kube-ai-demo-worker-gpu-02`.
 
 ![step15](/01-Install-Kubernetes/Image/step-15.png)
 
@@ -293,7 +293,12 @@ All 3 nodes should show, in `Ready` state: `kube-ai-demo-master-01`, `kube-ai-de
 
 ### Step 16 — Label the non-GPU worker node
 
-This label is what lets a non-GPU workload's nodeSelector be pinned to this node, keeping the GPU worker free for GPU workloads — the label on its own does nothing until a pod spec selects it. On the master node:
+On the master node:
+
+In this guide, we use one non-GPU node and one GPU node — the aim is to run non-GPU workloads on the non-GPU node and AI/GPU workloads on the GPU node.
+  - For non-GPU workloads, we use a label on the non-GPU node to make sure they land there. We'll reference this label later in the demo activities when deploying non-GPU workloads.
+  - For GPU workloads, we don't need to do this manually — Kubernetes handles it through Node Feature Discovery, GPU Feature Discovery, and the Device Plugin, all deployed by the GPU Operator. These let the scheduler see which node actually has a GPU and place GPU workloads there automatically.
+
 
 ```bash
 kubectl label node kube-ai-demo-worker-no-gpu-01 workload-type=non-gpu
@@ -308,7 +313,9 @@ kubectl get node kube-ai-demo-worker-no-gpu-01 --show-labels
 
 ### Step 17 — Install Helm on the master node
 
-You'll need Helm for demos that deploy via Helm charts (e.g. the GPU Operator). On the master node:
+On the master node:
+
+Some of the demo activities deploy packaged applications via Helm charts (e.g. the GPU Operator), so we install Helm on the master node now to cover that need.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o get_helm.sh && chmod +x get_helm.sh && ./get_helm.sh && rm -f get_helm.sh
