@@ -97,7 +97,7 @@ kubectl patch clusterpolicies.nvidia.com/cluster-policy --type='json' \
 
 *Note: `mixed` strategy is needed here because we're running one big instance and two small instances side by side on the same card — each size is then advertised as its own resource (e.g. `nvidia.com/mig-4g.71gb`, `nvidia.com/mig-1g.35gb`).*
 
-> You can use this command to check if the patching succeeded ```bash kubectl get clusterpolicies.nvidia.com/cluster-policy -o jsonpath='{.spec.mig.strategy}'```
+> You can use this command to check if the patching succeeded `kubectl get clusterpolicies.nvidia.com/cluster-policy -o jsonpath='{.spec.mig.strategy}'`
 
 ![step3](/02-Demos/02-Configure-MIG/Image/step-3.png)
 
@@ -155,7 +155,7 @@ kubectl patch clusterpolicies.nvidia.com/cluster-policy --type='json' \
   -p='[{"op":"replace", "path":"/spec/migManager/config/name", "value":"custom-mig-config"}]'
 ```
 
-> You can use this command to check if the patching succeeded ```bash kubectl get clusterpolicies.nvidia.com/cluster-policy -o jsonpath='{.spec.migManager.config.name}'```
+> You can use this command to check if the patching succeeded `kubectl get clusterpolicies.nvidia.com/cluster-policy -o jsonpath='{.spec.migManager.config.name}'`
 
 
 ![step6](/02-Demos/02-Configure-MIG/Image/step-6.png)
