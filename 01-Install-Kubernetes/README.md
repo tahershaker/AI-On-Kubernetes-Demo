@@ -16,7 +16,6 @@ This guide uses the [RKE2 quick start script](https://docs.rke2.io/install/quick
 
 This guide builds a demo cluster and is not intended for a production environment. -- This is for demo purposes only. **Do not use this in a production environment.**
 
-
 ---
 
 ## Architecture 
