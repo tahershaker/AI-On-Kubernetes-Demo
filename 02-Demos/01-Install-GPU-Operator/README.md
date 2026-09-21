@@ -20,7 +20,7 @@ This guide builds a demo cluster and is not intended for a production environmen
 
 ## Prerequisites
 
-- Logged in to the master node, with `kubectl` working: ```bash kubectl get nodes``` - All 3 nodes should show `Ready`.
+- Logged in to the master node, with `kubectl` working: `kubectl get nodes` - All 3 nodes should show `Ready`.
 - SSH access to the GPU worker node for the driver and CUDA checks.
 - Helm installed on the master node (see [01-Install-Kubernetes/README.md](/01-Install-Kubernetes/README.md), Step 17).
 

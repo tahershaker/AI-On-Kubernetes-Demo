@@ -1,35 +1,54 @@
 # Deploy an LLM With vLLM and Connect OpenWebUI
 
-*Serves an LLM using vLLM, then deploys OpenWebUI on the non-GPU worker and connects it to vLLM's OpenAI-compatible API for browser-based chat access. Both use PVC-backed storage.*
+*Deploys an LLM using vLLM on the GPU node, then deploys OpenWebUI on the non-GPU node and connects it to vLLM's OpenAI-compatible API for browser-based chat access.*
 
 ---
 
 ## Description
 
-This demo deploys [vLLM](https://docs.vllm.ai/) as an OpenAI-compatible inference server, pinned to the `4g.71gb` MIG instance created in [02-Configure-MIG](/02-Demos/02-Configure-MIG/README.md) on `kube-ai-demo-worker-gpu-02`. It then deploys [OpenWebUI](https://docs.openwebui.com/) on the non-GPU worker (`kube-ai-demo-worker-no-gpu-01`) and connects it to vLLM's API, giving a browser-based chat interface backed by the H200 MIG slice.
+This sub-repo provides a step-by-step guide to deploy an LLM using [vLLM](https://docs.vllm.ai/) as an OpenAI-compatible inference server, pinned to the big MIG instance (`4g.71gb`) created in [02-Configure-MIG](/02-Demos/02-Configure-MIG/README.md) on the GPU node. It then deploys [OpenWebUI](https://docs.openwebui.com/) on the non-GPU node and connects it to vLLM's API, giving a browser-based chat interface backed by the GPU.
 
-The model used is `Qwen/Qwen2.5-7B-Instruct` from Hugging Face — openly licensed, no gated-access approval needed, and its ~15 GB of weights fit comfortably in a 25Gi PVC.
+The focus of this sub-repo is to serve a model from Hugging Face through vLLM, expose it as an OpenAI-compatible API inside the cluster, connect OpenWebUI to that API, and back both vLLM's model cache and OpenWebUI's data with PersistentVolumeClaims rather than node-local directories.
 
-Both vLLM's model cache and OpenWebUI's data directory are backed by PersistentVolumeClaims. RKE2 does not ship a default StorageClass (unlike K3s), so this demo also installs [Rancher's local-path-provisioner](https://github.com/rancher/local-path-provisioner) to dynamically provision them.
+The model used is `Qwen/Qwen2.5-7B-Instruct` — openly licensed on Hugging Face with no gated-access approval needed, and small enough to fit comfortably within the storage and GPU budget of this demo.
 
-This is for demo purposes only. **Do not use this in a production environment.**
+*Note: RKE2 does not ship a default StorageClass (unlike K3s). This sub-repo installs [Rancher's local-path-provisioner](https://github.com/rancher/local-path-provisioner) to dynamically provision the PVCs used here — a simple, single-replica, node-local provisioner that is fine for a demo but not what a production cluster would use.*
+
+This guide builds a demo cluster and is not intended for a production environment. -- This is for demo purposes only. **Do not use this in a production environment.**
 
 ---
 
 ## Prerequisites
 
-- Logged in to the master node, with `kubectl` working:
-
-```bash
-kubectl get nodes
-```
-
-All 3 nodes should show `Ready`.
-
+- Logged in to the master node, with `kubectl` working: `kubectl get nodes` - All 3 nodes should show `Ready`.
 - The MIG split from [02-Configure-MIG](/02-Demos/02-Configure-MIG/README.md) is applied, and `kube-ai-demo-worker-gpu-02` advertises `nvidia.com/mig-4g.71gb: 1`.
 - `kube-ai-demo-worker-no-gpu-01` is labeled `workload-type=non-gpu` (see [01-Install-Kubernetes, Step 16](/01-Install-Kubernetes/README.md)).
 - Outbound internet access from `kube-ai-demo-worker-gpu-02` — vLLM downloads the model weights from Hugging Face on first start (~15 GB for this model).
 - At least ~30 GB free disk on the node(s) backing storage — the local-path-provisioner used here provisions PVCs as directories on the node, under `/opt/local-path-provisioner` by default.
+
+---
+
+## Configuration Flow
+
+This guide follows this order:
+
+1. Create the namespace for this demo
+2. Install the local-path storage provisioner
+3. Confirm the local-path StorageClass is available
+4. Create the vLLM model cache PVC
+5. Confirm the PVC is Pending (WaitForFirstConsumer binding)
+6. Deploy vLLM on the big MIG GPU instance
+7. Watch the vLLM pod come up
+8. Confirm the vLLM PVC is now Bound
+9. Confirm vLLM finished loading the model
+10. Create a Service for vLLM
+11. Test the vLLM API from inside the cluster
+12. Create the OpenWebUI data PVC
+13. Deploy OpenWebUI, pointed at the vLLM Service
+14. Watch the OpenWebUI pod come up
+15. Expose OpenWebUI with a NodePort Service
+16. Open OpenWebUI in a browser
+17. Send a test prompt
 
 ---
 
@@ -56,17 +75,19 @@ kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisione
 kubectl get storageclass
 ```
 
-*Note: RKE2 does not bundle a default StorageClass out of the box (K3s does, RKE2 doesn't). This installs the community-maintained Rancher local-path-provisioner, which creates a `local-path` StorageClass and dynamically provisions each PVC as a directory on whichever node the pod claiming it lands on. This is a simple, single-replica, node-local provisioner — fine for this demo, not what you'd use in production (no replication, tied to one node).*
-
 ![step2](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-2.png)
 
-You should see `local-path` listed.
+> You should see `local-path` listed.
+
+> *Note: RKE2 does not bundle a default StorageClass out of the box. This installs the community-maintained Rancher local-path-provisioner, which creates a `local-path` StorageClass and dynamically provisions each PVC as a directory on whichever node the pod claiming it lands on. This is a simple, single-replica, node-local provisioner — fine for this demo, not what you'd use in production (no replication, tied to one node).*
 
 ---
 
 ### Step 3 — Create the vLLM model cache PVC & Confirm the PVC is Pending
 
 On the master node:
+
+This creates a dedicated PVC to be mounted into the vLLM pod to be created in Step 4, so it can use it as the Hugging Face cache directory — the downloaded model persists there instead of being re-downloaded on every pod restart.
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -86,12 +107,11 @@ EOF
 kubectl get pvc -n vllm-openwebui-demo
 ```
 
-*Note: mounted into the vLLM pod as the Hugging Face cache directory, so the model is downloaded once and reused across pod restarts. 25Gi comfortably covers this model's ~15 GB of weights with headroom, out of the ~30 GB budget.*
-
 ![step3](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-3.png)
 
-Status should show `Pending`. *Note: `local-path` uses `WaitForFirstConsumer` binding — the underlying volume isn't created until a pod that mounts this PVC is actually scheduled, so it stays Pending until Step 7.*
+> Status should show `Pending`. *Note: `local-path` uses `WaitForFirstConsumer` binding — the underlying volume isn't created until a pod that mounts this PVC is actually scheduled, so it stays Pending until Step 7.*
 
+*Note: mounted into the vLLM pod as the Hugging Face cache directory, so the model is downloaded once and reused across pod restarts. 25Gi comfortably covers this model's ~15 GB of weights with headroom, out of the ~30 GB budget.*
 
 ---
 
@@ -153,9 +173,9 @@ spec:
 EOF
 ```
 
-*Note: `nvidia.com/mig-4g.71gb: 1` requests the big MIG instance specifically — the GPU Operator advertises each MIG size as its own resource, so this pod cannot land on a `1g.35gb` slice. `--gpu-memory-utilization` and `--max-model-len` are vLLM's own tuning flags; the values here are conservative starting points.*
-
 ![step4](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-4.png)
+
+> *Note: `nvidia.com/mig-4g.71gb: 1` requests the big MIG instance specifically — the GPU Operator advertises each MIG size as its own resource, so this pod cannot land on a `1g.35gb` slice. `--gpu-memory-utilization` and `--max-model-len` are vLLM's own tuning flags; the values here are conservative starting points.*
 
 ---
 
@@ -167,9 +187,8 @@ On the master node:
 kubectl get pods -n vllm-openwebui-demo -w
 ```
 
-First start pulls the vLLM image (~9 GB) and downloads the model weights — this can take several minutes. Press `Ctrl+C` once the pod shows `Running`.
-
-Also use this command to confirm the vllm pod is now running on the GPU node and not the Non-GPU node ```bash kubectl get pods -n vllm-openwebui-demo -o wide```
+> First start pulls the vLLM image (~9 GB) and downloads the model weights — this can take several minutes. Press `Ctrl+C` once the pod shows `Running`.
+> Also use this command to confirm the vllm pod is now running on the GPU node and not the Non-GPU node `kubectl get pods -n vllm-openwebui-demo -o wide`
 
 ![step5](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-5.png)
 
@@ -183,9 +202,9 @@ On the master node:
 kubectl get pvc -n vllm-openwebui-demo
 ```
 
-Status should now show `Bound` — the volume was created once the pod above was scheduled onto `kube-ai-demo-worker-gpu-02`.
-
 ![step6](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-6.png)
+
+> Status should now show `Bound` — the volume was created once the pod above was scheduled onto `kube-ai-demo-worker-gpu-02`.
 
 ---
 
@@ -193,13 +212,16 @@ Status should now show `Bound` — the volume was created once the pod above was
 
 On the master node:
 
+A `Running` pod status only means the container started — it doesn't mean vLLM has finished downloading the model into the PVC and loading it onto the GPU. Sending requests before that point just gets connection errors. This step tails the pod's logs to catch the actual readiness signal before moving on.
+
+
 ```bash
 kubectl logs -n vllm-openwebui-demo -l app=vllm -f
 ```
 
-Look for a line confirming the API server is up (`Application startup complete` / `Uvicorn running on http://0.0.0.0:8000`). Press `Ctrl+C` once you see it.
-
 ![step7](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-7.png)
+
+> Look for a line confirming the API server is up (`Application startup complete` / `Uvicorn running on http://0.0.0.0:8000`). Press `Ctrl+C` once you see it.
 
 ---
 
@@ -223,7 +245,7 @@ spec:
 EOF
 ```
 
-Use this command to check the creation of the service ```bash kubectl get svc -n vllm-openwebui-demo```
+> Use this command to check the creation of the service `kubectl get svc -n vllm-openwebui-demo`
 
 ![step-8](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-8.png)
 
@@ -233,11 +255,13 @@ Use this command to check the creation of the service ```bash kubectl get svc -n
 
 On the master node:
 
+This checks vLLM's API on its own, before OpenWebUI enters the picture, so a later problem is easy to isolate to one side or the other. The below command runs a temporary pod using the `curl` image to send a request to vLLM's API and confirm it's up and serving — the pod deletes itself automatically once the command finishes (`--rm`). Testing from inside the cluster this way also confirms the Service's DNS name and port are reachable, the same way OpenWebUI will reach them.
+
 ```bash
 kubectl run vllm-test -n vllm-openwebui-demo --rm -it --restart=Never --image=curlimages/curl -- curl -s http://vllm-service:8000/v1/models
 ```
 
-You should see a JSON response listing `qwen2.5-7b` as an available model — confirming vLLM is serving on the MIG slice and reachable over the cluster network.
+> You should see a JSON response listing `qwen2.5-7b` as an available model — confirming vLLM is serving on the MIG slice and reachable over the cluster network.
 
 ![step9](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-9.png)
 
@@ -246,6 +270,8 @@ You should see a JSON response listing `qwen2.5-7b` as an available model — co
 ### Step 10 — Create the OpenWebUI data PVC
 
 On the master node:
+
+This creates a dedicated PVC to be mounted into the OpenWebUI pod in Step 11, so it can use it to persist its own database — chat history and settings — instead of losing them on every pod restart.
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -317,9 +343,9 @@ spec:
 EOF
 ```
 
-*Note: `nodeSelector: workload-type: non-gpu` uses the label set in the RKE2 install repo to keep this off the GPU node. `WEBUI_AUTH=false` skips OpenWebUI's login screen for this demo — not something to carry into production.*
-
 ![step11](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-11.png)
+
+*Note: `nodeSelector: workload-type: non-gpu` uses the label set in the RKE2 install repo to keep this off the GPU node. `WEBUI_AUTH=false` skips OpenWebUI's login screen for this demo — not something to carry into production.*
 
 ---
 
@@ -331,9 +357,8 @@ On the master node:
 kubectl get pods -n vllm-openwebui-demo -w
 ```
 
-Also use this command to confirm the OpenWebUI pod is now running on the Non-GPU node and not the GPU node ```bash kubectl get pods -n vllm-openwebui-demo -o wide```
-
-Press `Ctrl+C` once the pod shows `Running`.
+> Press `Ctrl+C` once the pod shows `Running`.
+> Also use this command to confirm the OpenWebUI pod is now running on the Non-GPU node and not the GPU node `kubectl get pods -n vllm-openwebui-demo -o wide`
 
 ![step12](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/Image/step-12.png)
 
@@ -367,7 +392,7 @@ EOF
 
 ### Step 14 — Open OpenWebUI in a browser
 
-Get the public IP of `kube-ai-demo-worker-no-gpu-01` from your cloud provider console (the same IP you use to SSH into it), then browse to:
+Get the public IP of the GPU node from your cloud provider console (the same IP you use to SSH into it), then browse to:
 
 ```
 http://<worker-no-gpu-01-public-ip>:30080

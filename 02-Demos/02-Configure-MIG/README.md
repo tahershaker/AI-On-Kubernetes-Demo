@@ -25,7 +25,7 @@ This guide builds a demo cluster and is not intended for a production environmen
 
 ## Prerequisites
 
-- Logged in to the master node, with `kubectl` working: ```bash kubectl get nodes``` - All 3 nodes should show `Ready`.
+- Logged in to the master node, with `kubectl` working: `kubectl get nodes` - All 3 nodes should show `Ready`.
 - The NVIDIA GPU Operator is already installed and the GPU is exposed on GPU node (see [01-Install-GPU-Operator/README.md](/02-Demos/01-Install-GPU-Operator/README.md)).
 
 ---
