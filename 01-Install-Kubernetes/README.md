@@ -6,15 +6,20 @@
 
 ## Description
 
-This sub-repo installs [RKE2](https://docs.rke2.io/) on the 3 nodes provisioned for this repo, and brings them up as a working Kubernetes cluster: 1 master and 2 workers (1 non-GPU, 1 GPU).
+This sub-repo provides a step-by-step guide to install an [RKE2](https://docs.rke2.io/) Kubernetes cluster on the provisioned infrastructure. The provisioned infrastructure is 3 virtual machines, one of which has a GPU (H200 SXM). It is provisioned on `Nebius Cloud`, as described in the main repo's README — provisioning the infrastructure is out of scope for this sub-repo.
 
-This repo uses RKE2. If you want to install a different Kubernetes distribution, you can — but you will need to adjust the steps, commands, and files below to match it.
+To follow the demos in the main repo, you can use RKE2 or any other Kubernetes distribution of your choice. If you choose a different distribution, some commands, code, or configuration steps will need to be adjusted to match the goal of each demo.
 
-This is for demo purposes only. **Do not use this in a production environment.**
+The focus of this sub-repo is to install and configure a Kubernetes cluster using RKE2, and confirm the cluster is up and running, as preparation for the demo activities in this repo.
+
+This guide builds a demo cluster and is not intended for a production environment. -- This is for demo purposes only. **Do not use this in a production environment.**
+
 
 ---
 
 ## Architecture 
+
+The diagram below shows a high-level architecture of the provisioned infrastructure: 3 VM nodes, all connected to the same VPC network, each exposed to the internet and configured with both a private IP and a public IP.
 
 ![hl-arc](/Image/hl-arch.png)
 
@@ -22,14 +27,21 @@ This is for demo purposes only. **Do not use this in a production environment.**
 
 ## Environment
 
-| Node | Role | Hostname |
-|---|---|---|
-| Master Node | Control plane | `kube-ai-demo-master-01` |
-| Worker Node 01 | Worker (non-GPU) | `kube-ai-demo-worker-no-gpu-01` |
-| Worker Node 02 | Worker (GPU) | `kube-ai-demo-worker-gpu-02` |
+The tables below give a high-level summary of the infrastructure and the configuration used in this guide. You can change the configuration, but doing so means paying closer attention to the commands and code below, to make sure they match your changes.
+
+**Node Roles, Hostnames & Resource Configuration**
+
+| Node | Role | Hostname | CPU | Memory | GPU | Disk |
+|---|---|---|---|---|---|---|
+| Master Node | Control plane | `kube-ai-demo-master-01` | 2 | 8GB | None | 60GB |
+| Worker Node 01 | Worker (non-GPU) | `kube-ai-demo-worker-no-gpu-01` | 2 | 16GB | None | 60GB |
+| Worker Node 02 | Worker (GPU) | `kube-ai-demo-worker-gpu-02` | 16 | 20GB | 1xH200-SXM | 60GB |
+
+**RKE2 Configuration Values**
 
 | Setting | Value |
 |---|---|
+| Version | Latest |
 | CNI | Calico |
 | Cluster CIDR | `172.16.0.0/16` |
 | Service CIDR | `172.17.0.0/16` |
@@ -43,6 +55,21 @@ You can use your own hostnames or CIDRs if you prefer — just adjust the comman
 
 - The 3 nodes are provisioned and you are logged in to each as `root` (or a user with `sudo`).
 - Outbound internet access from each node.
+
+---
+
+## Configuration Flow
+
+This guide follows this order:
+
+1. Configure the hostname on each node (master & workers)
+2. Create the RKE2 configuration file on each node (master & workers)
+3. Install and start RKE2 on the master node
+4. Set up `kubectl` access and verify the master node is ready
+5. Install and start RKE2 on the worker nodes (non-GPU, then GPU)
+6. Verify all 3 nodes have joined the cluster
+7. Label the non-GPU worker node, so non-GPU workloads can be pinned to it
+8. Install Helm on the master node
 
 ---
 
