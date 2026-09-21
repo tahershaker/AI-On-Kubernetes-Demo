@@ -8,11 +8,11 @@
 
 This sub-repo provides a step-by-step guide to install an [RKE2](https://docs.rke2.io/) Kubernetes cluster on the provisioned infrastructure. The provisioned infrastructure is 3 virtual machines, one of which has a GPU (H200 SXM). It is provisioned on `Nebius Cloud`, as described in the main repo's README — provisioning the infrastructure is out of scope for this sub-repo.
 
-To follow the demos in the main repo, you can use RKE2 or any other Kubernetes distribution of your choice. If you choose a different distribution, some commands, code, or configuration steps will need to be adjusted to match the goal of each demo.
-
 The focus of this sub-repo is to install and configure a Kubernetes cluster using RKE2, and confirm the cluster is up and running, as preparation for the demo activities in this repo.
 
 This guide uses the [RKE2 quick start script](https://docs.rke2.io/install/quickstart) to bootstrap each node with its required role.
+
+*Note: You can use RKE2 or any other Kubernetes distribution of your choice. If you choose a different distribution, some commands, code, or configuration steps provided in the demo section(s) may need to be adjusted to match the goal of each demo.*
 
 This guide builds a demo cluster and is not intended for a production environment. -- This is for demo purposes only. **Do not use this in a production environment.**
 
