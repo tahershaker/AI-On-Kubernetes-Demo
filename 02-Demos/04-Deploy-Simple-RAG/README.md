@@ -36,13 +36,14 @@ This demo wires together five pieces, each doing one job:
 
 Data flow for a single question, end to end:
 
-|Browser (OpenWebUI) |
-|---|
-|  - RAG API (embeds the question via TEI) |
-|  - Chroma (returns the closest handbook chunks) |
-|  - RAG API (builds a grounded prompt from those chunks) |
-|  - vLLM (generates the answer) |
-|  - back to OpenWebUI |
+```
+Browser (OpenWebUI)
+  -> RAG Ingestion (embeds the question via TEI)
+  -> Chroma (returns the closest handbook chunks)
+  -> RAG API (builds a grounded prompt from those chunks)
+  -> vLLM (generates the answer)
+  -> back to OpenWebUI
+```
 
 ---
 
@@ -54,6 +55,38 @@ Data flow for a single question, end to end:
 - `kube-ai-demo-worker-no-gpu-01` is labeled `workload-type=non-gpu` (see [01-Install-Kubernetes, Step 16](/01-Install-Kubernetes/README.md)).
 - Outbound internet access from `kube-ai-demo-worker-gpu-02` — TEI downloads the embedding model (~130 MB) from Hugging Face on first start.
 - Outbound internet access from `kube-ai-demo-worker-no-gpu-01` — the Job installs `chromadb` and `requests` with `pip` on first run.
+
+---
+
+## Configuration Flow
+
+This guide follows this order:
+
+1. Confirm the base model has no knowledge of AI-Demo-Lab (baseline check)
+2. Create the namespace for this demo
+3. Create the Chroma PVC
+4. Deploy Chroma on the non-GPU worker
+5. Watch the Chroma pod come up
+6. Create a Service for Chroma
+7. Deploy TEI (embedding server) on the small MIG instance
+8. Watch the TEI pod come up
+9. Create a Service for TEI
+10. Test the embedding endpoint
+11. Create the AI-Demo-Lab company handbook file
+12. Load the handbook into a ConfigMap
+13. Create the ingestion script and load it into a ConfigMap
+14. Deploy the ingestion Job
+15. Watch the ingestion Job run to completion
+16. Check the ingestion output
+17. Create the RAG API script and load it into a ConfigMap
+18. Deploy the RAG API
+19. Watch the RAG API pod come up
+20. Create a Service for the RAG API
+21. Test the RAG API directly
+22. Add the RAG API connection through OpenWebUI's Admin UI
+23. Open OpenWebUI and select the RAG model
+24. Send a test prompt and confirm a grounded answer
+25. Clean up the ingestion Job
 
 ---
 
@@ -151,7 +184,7 @@ spec:
 EOF
 ```
 
-*Note: `chromadb/chroma` stores its data at `/data` inside the container — mapped here to the PVC so the vector store survives a pod restart.*
+> *Note: `chromadb/chroma` stores its data at `/data` inside the container — mapped here to the PVC so the vector store survives a pod restart.*
 
 ![step3](/02-Demos/04-Deploy-Simple-RAG/Image/step-3.png)
 
@@ -165,9 +198,9 @@ On the master node:
 kubectl get pods -n simple-rag-demo -l app=chroma -w
 ```
 
-Press `Ctrl+C` once the pod shows `Running`.
+> Press `Ctrl+C` once the pod shows `Running`.
 
-Also use this command to confirm the Chroma pod is now running on the Non-GPU node and not the GPU node ```bash kubectl get pods -n simple-rag-demo -l app=chroma -o wide```
+> Also use this command to confirm the Chroma pod is now running on the Non-GPU node and not the GPU node `kubectl get pods -n simple-rag-demo -l app=chroma -o wide`
 
 ![step4](/02-Demos/04-Deploy-Simple-RAG/Image/step-4.png)
 
@@ -200,6 +233,8 @@ EOF
 ### Step 6 — Deploy TEI (embedding server) on the small MIG instance
 
 On the master node:
+
+This deploys the embedding server that will convert text into vectors, pinned to one of the two `1g.35gb` MIG slices so it runs isolated from the `4g.71gb` slice vLLM uses for generation:
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -250,7 +285,7 @@ On the master node:
 kubectl get pods -n simple-rag-demo -l app=tei -w
 ```
 
-First start downloads the embedding model. Press `Ctrl+C` once the pod shows `Running`.
+> First start downloads the embedding model. Press `Ctrl+C` once the pod shows `Running`.
 
 ![step7](/02-Demos/04-Deploy-Simple-RAG/Image/step-7.png)
 
@@ -284,12 +319,14 @@ EOF
 
 On the master node:
 
+This tests both the availability and the functionality of the TEI deployment — it confirms the service is up and reachable over the cluster network, and by passing a piece of random text through it, confirms it actually returns a vector embedding rather than an error:
+
 ```bash
 kubectl run tei-test -n simple-rag-demo --rm -it --restart=Never --image=curlimages/curl -- \
   curl -s -X POST http://tei-service/embed -H "Content-Type: application/json" -d '{"inputs":"hello world"}'
 ```
 
-You should see a JSON array of floating-point numbers — confirming the embedding model is serving on the GPU and reachable over the cluster network.
+> You should see a JSON array of floating-point numbers — confirming the embedding model is serving on the GPU and reachable over the cluster network.
 
 ![step9](/02-Demos/04-Deploy-Simple-RAG/Image/step-9.png)
 
@@ -297,9 +334,12 @@ You should see a JSON array of floating-point numbers — confirming the embeddi
 
 ### Step 10 — Create the AI-Demo-Lab company handbook file
 
-On the master node. This is the knowledge base the demo retrieves from — a fictional company handbook covering company background and internal policies. 
+On the master node. 
 
-Copy the content of the `ai-demo-lab-handbook.txt` file located in [The Docs Section](/02-Demos/04-Deploy-Simple-RAG/Docs/ai-demo-lab-handbook.txt) and past it in the below command to create this file on the master node.
+This is the knowledge base the demo retrieves from — a fictional company handbook covering company background and internal policies. This step only creates the file on the master node's local filesystem; the next step loads it into a ConfigMap, which is then mounted into the ingestion Job so the handbook can be chunked and embedded.
+
+Copy the content of the `ai-demo-lab-handbook.txt` file located in [The Docs Section](/02-Demos/04-Deploy-Simple-RAG/Docs/ai-demo-lab-handbook.txt) and paste it into the command below to create this file on the master node.
+
 
 ```bash
 cat <<'EOF' > ai-demo-lab-handbook.txt
@@ -315,6 +355,8 @@ EOF
 
 On the master node:
 
+This loads the handbook file created in the previous step into a ConfigMap, so it can be mounted as a file inside the ingestion Job's pod in Step 13:
+
 ```bash
 kubectl create configmap rag-docs -n simple-rag-demo --from-file=handbook.txt=ai-demo-lab-handbook.txt
 ```
@@ -326,6 +368,10 @@ kubectl create configmap rag-docs -n simple-rag-demo --from-file=handbook.txt=ai
 ### Step 12 — Create the ingestion script and load it into a ConfigMap
 
 On the master node. This script only chunks the handbook, embeds it, and stores it in Chroma — it does not handle a question or call vLLM, since that part now lives in the RAG API created in Step 16:
+
+This writes the ingestion logic (chunking, embedding, and storing into Chroma) to a file and loads it into a ConfigMap, the same way the handbook was loaded in Step 11. Both ConfigMaps — the script and the handbook — get mounted together into the ingestion Job in the next step, so the Job has both the code to run and the data to run it against.
+
+*Note: storing the script itself in a ConfigMap is a demo simplification. In production, this logic would most probably be baked into its own container image, built and versioned through a CI pipeline, rather than pasted into a ConfigMap by hand — a ConfigMap also has a size limit (1MiB), which a real ingestion script with its dependencies would likely outgrow.*
 
 ```bash
 cat <<'EOF' > rag-ingest.py
@@ -439,7 +485,7 @@ On the master node:
 kubectl get pods -n simple-rag-demo -l job-name=rag-ingest -w
 ```
 
-Wait until the pod shows `Completed`, then press `Ctrl+C`.
+> Wait until the pod shows `Completed`, then press `Ctrl+C`.
 
 ![step14](/02-Demos/04-Deploy-Simple-RAG/Image/step-14.png)
 
@@ -449,11 +495,13 @@ Wait until the pod shows `Completed`, then press `Ctrl+C`.
 
 On the master node:
 
+The Job has now run with both the script and the handbook file mounted into it, so the output here should confirm the handbook was actually chunked and stored in Chroma — not just that the pod completed:
+
 ```bash
 kubectl logs -n simple-rag-demo -l job-name=rag-ingest
 ```
 
-You should see the chunk count and a confirmation that the embeddings were stored in Chroma.
+> You should see the chunk count and a confirmation that the embeddings were stored in Chroma.
 
 ![step15](/02-Demos/04-Deploy-Simple-RAG/Image/step-15.png)
 
@@ -461,7 +509,13 @@ You should see the chunk count and a confirmation that the embeddings were store
 
 ### Step 16 — Create the RAG API script and load it into a ConfigMap
 
-On the master node. This is the piece that makes OpenWebUI retrieval-aware: it exposes the same `/v1/chat/completions` shape vLLM uses, but embeds the question, retrieves context from Chroma, and forwards an augmented prompt to vLLM before returning the answer:
+On the master node. 
+
+This is the piece that makes OpenWebUI retrieval-aware, sitting between OpenWebUI and vLLM without either one needing to know it's there.
+
+The RAG API exposes the exact same `/v1/chat/completions` shape that vLLM uses, so from OpenWebUI's point of view it looks like just another model to talk to — no custom integration needed on OpenWebUI's side. But on every request it does three things behind that familiar interface: it embeds the incoming question through TEI, uses that embedding to retrieve the closest matching chunks from Chroma, and builds a new prompt containing only those chunks before forwarding it to the real vLLM. The answer that comes back from vLLM is then passed straight through to OpenWebUI.
+
+Like the ingestion script in Step 13, this script is written to a file and loaded into a ConfigMap here, then mounted into a Deployment in the next step — the same pattern, just running continuously instead of once:
 
 ```bash
 cat <<'EOF' > rag-api.py
@@ -614,7 +668,7 @@ spec:
 EOF
 ```
 
-*Note: this is a Deployment, not a Job — unlike the ingestion step, the RAG API needs to stay running to answer questions from OpenWebUI on demand.*
+> *Note: this is a Deployment, not a Job — unlike the ingestion step, the RAG API needs to stay running to answer questions from OpenWebUI on demand.*
 
 ---
 
@@ -626,7 +680,7 @@ On the master node:
 kubectl get pods -n simple-rag-demo -l app=rag-api -w
 ```
 
-Press `Ctrl+C` once the pod shows `Running`.
+> Press `Ctrl+C` once the pod shows `Running`.
 
 ![step18](/02-Demos/04-Deploy-Simple-RAG/Image/step-18.png)
 
@@ -660,6 +714,8 @@ EOF
 
 On the master node:
 
+This tests the full retrieval-and-generation flow end to end — embedding the question, searching Chroma, and calling vLLM — directly against the RAG API, before wiring it into OpenWebUI in the next step. If something's broken in the chain, it's easier to catch here than after adding OpenWebUI's UI on top:
+
 ```bash
 kubectl run rag-api-test -n simple-rag-demo --rm -it --restart=Never --image=curlimages/curl -- \
   curl -s -X POST http://rag-api-service:8001/v1/chat/completions \
@@ -667,7 +723,7 @@ kubectl run rag-api-test -n simple-rag-demo --rm -it --restart=Never --image=cur
   -d '{"model":"ai-demo-lab-rag","messages":[{"role":"user","content":"How many days of paid annual leave do employees get?"}]}'
 ```
 
-You should see a JSON response whose answer states 25 days — confirming retrieval and generation work end to end before wiring this into OpenWebUI.
+> You should see a JSON response whose answer states `25 days` — confirming retrieval and generation work end to end before wiring this into OpenWebUI.
 
 ![step20](/02-Demos/04-Deploy-Simple-RAG/Image/step-20.png)
 
