@@ -36,30 +36,18 @@ This demo wires together five pieces, each doing one job:
 
 Data flow for a single question, end to end:
 
-> Browser (OpenWebUI)
-
->   -> RAG API (embeds the question via TEI)
-
->   -> Chroma (returns the closest handbook chunks)
-
->   -> RAG API (builds a grounded prompt from those chunks)
-
->   -> vLLM (generates the answer)
-
->   -> back to OpenWebUI
+|Browser (OpenWebUI)
+|  - RAG API (embeds the question via TEI)
+|  - Chroma (returns the closest handbook chunks)
+  - RAG API (builds a grounded prompt from those chunks)
+  - vLLM (generates the answer)
+  - back to OpenWebUI
 
 ---
 
 ## Prerequisites
 
-- Logged in to the master node, with `kubectl` working:
-
-```bash
-kubectl get nodes
-```
-
-All 3 nodes should show `Ready`.
-
+- Logged in to the master node, with `kubectl` working: `kubectl get nodes` - All 3 nodes should show `Ready`.
 - The MIG split from [02-Configure-MIG](/02-Demos/02-Configure-MIG/README.md) is applied, and `kube-ai-demo-worker-gpu-02` advertises `nvidia.com/mig-1g.35gb: 2` (this demo uses one of the two slices; the other stays free).
 - The vLLM deployment from [03-Deploy-vLLM-OpenWebUI](/02-Demos/03-Deploy-vLLM-OpenWebUI/README.md) is running and reachable at `vllm-service.vllm-openwebui-demo.svc.cluster.local:8000`, serving `qwen2.5-7b`.
 - `kube-ai-demo-worker-no-gpu-01` is labeled `workload-type=non-gpu` (see [01-Install-Kubernetes, Step 16](/01-Install-Kubernetes/README.md)).
