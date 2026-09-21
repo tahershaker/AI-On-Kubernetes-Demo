@@ -227,7 +227,7 @@ On the master node:
 kubectl get nodes
 ```
 
-You should see `kube-ai-demo-master-01` in `Ready` state.
+> You should see `kube-ai-demo-master-01` in `Ready` state.
 
 ![step10](/01-Install-Kubernetes/Image/step-10.png)
 
