@@ -78,10 +78,10 @@ This guide follows this order:
 
 ### Step 1 — Set the hostname on the master node
 
-On the master node:
+On the master node, replace `<Node_Hostname>` with the node's Hostname:
 
 ```bash
-sudo hostnamectl set-hostname --static kube-ai-demo-master-01
+sudo hostnamectl set-hostname --static <Node_Hostname>
 if grep -q "^preserve_hostname" /etc/cloud/cloud.cfg 2>/dev/null; then
   sudo sed -i 's/^preserve_hostname:.*/preserve_hostname: true/' /etc/cloud/cloud.cfg
 else
@@ -96,10 +96,10 @@ exec bash
 
 ### Step 2 — Set the hostname on the non-GPU worker node
 
-On the non-GPU worker node:
+On the non-GPU worker node, replace `<Node_Hostname>` with the node's Hostname:
 
 ```bash
-sudo hostnamectl set-hostname --static kube-ai-demo-worker-no-gpu-01
+sudo hostnamectl set-hostname --static <Node_Hostname>
 if grep -q "^preserve_hostname" /etc/cloud/cloud.cfg 2>/dev/null; then
   sudo sed -i 's/^preserve_hostname:.*/preserve_hostname: true/' /etc/cloud/cloud.cfg
 else
@@ -112,10 +112,10 @@ exec bash
 
 ### Step 3 — Set the hostname on the GPU worker node
 
-On the GPU worker node:
+On the GPU worker node, replace `<Node_Hostname>` with the node's Hostname:
 
 ```bash
-sudo hostnamectl set-hostname --static kube-ai-demo-worker-gpu-02
+sudo hostnamectl set-hostname --static <Node_Hostname>
 if grep -q "^preserve_hostname" /etc/cloud/cloud.cfg 2>/dev/null; then
   sudo sed -i 's/^preserve_hostname:.*/preserve_hostname: true/' /etc/cloud/cloud.cfg
 else
@@ -128,12 +128,12 @@ exec bash
 
 ### Step 4 — Create the RKE2 config file on the master node
 
-On the master node, replace `<Node_FQDN>` with the node's FQDN:
+On the master node, replace `<Node_Hostname>` with the node's FQDN:
 
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
 write-kubeconfig-mode: "0644"
-node-name: <Node_FQDN>
+node-name: <Node_Hostname>
 cni: "calico"
 cluster-cidr: "172.16.0.0/16"
 service-cidr: "172.17.0.0/16"
@@ -147,12 +147,12 @@ EOF
 
 ### Step 5 — Create the RKE2 config file on the non-GPU worker node
 
-On the non-GPU worker node, replace `<Node_FQDN>` with the node's FQDN, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
+On the non-GPU worker node, replace `<Node_Hostname>` with the node's FQDN, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
 
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
 write-kubeconfig-mode: "0644"
-node-name: <Node_FQDN>
+node-name: <Node_Hostname>
 server: https://<MASTER_PRIVATE_IP>:9345
 token: AiDemoRKE2token!!5s84s9f9e3d2f2x3f1
 EOF
@@ -162,12 +162,12 @@ EOF
 
 ### Step 6 — Create the RKE2 config file on the GPU worker node
 
-On the GPU worker node, replace `<Node_FQDN>` with the node's FQDN, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
+On the GPU worker node, replace `<Node_Hostname>` with the node's FQDN, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
 
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
 write-kubeconfig-mode: "0644"
-node-name: <Node_FQDN>
+node-name: <Node_Hostname>
 server: https://<MASTER_PRIVATE_IP>:9345
 token: AiDemoRKE2token!!5s84s9f9e3d2f2x3f1
 EOF
