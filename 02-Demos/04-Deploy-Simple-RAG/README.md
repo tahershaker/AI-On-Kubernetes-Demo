@@ -1,20 +1,49 @@
 # Build A Simple RAG (Vector DB + GPU Embedding Model)
 
-*Builds a Retrieval-Augmented Generation setup using real building blocks instead of a framework: [Chroma](https://docs.trychroma.com/) as the vector database, [Text Embeddings Inference (TEI)](https://github.com/huggingface/text-embeddings-inference) as a GPU-backed embedding server, and vLLM for the final generation step. Knowledge base is a 10-page fictional company handbook, chunked and embedded for retrieval testing.*
+*Builds a Retrieval-Augmented Generation (RAG) pipeline using explicit, individually deployed building blocks instead of a RAG framework — a vector database, a GPU-backed embedding server, and a small custom retrieval API — grounding vLLM's answers in a fictional company handbook, with questions asked live from OpenWebUI.*
 
 ---
 
 ## Description
 
-This demo builds a small but real RAG stack, with each piece as its own Kubernetes workload talking to the others over the cluster network:
+This sub-repo provides a step-by-step guide to building a Retrieval-Augmented Generation (RAG) setup using explicit, individually deployed building blocks instead of a RAG framework such as LangChain or LlamaIndex.
 
+The focus of this sub-repo is to stand up a vector database ([Chroma](https://docs.trychroma.com/)), a GPU-backed embedding server ([Text Embeddings Inference](https://github.com/huggingface/text-embeddings-inference), running on one of the two `1g.35gb` MIG instances created in [02-Configure-MIG](/02-Demos/02-Configure-MIG/README.md)), load a fictional 10-page company handbook for "AI-Demo-Lab" into that vector database, and expose a small custom API that performs retrieval before handing a grounded prompt to vLLM. That API is then connected into OpenWebUI (from [03-Deploy-vLLM-OpenWebUI](/02-Demos/03-Deploy-vLLM-OpenWebUI/README.md)) as a second model, so a retrieval-grounded answer can be compared directly against the raw model's answer, live from the browser.
+
+The components used to build this demo are:
 - **TEI** — a GPU-backed embedding server, pinned to one of the two `1g.35gb` MIG slices created in [02-Configure-MIG](/02-Demos/02-Configure-MIG/README.md), serving the `BAAI/bge-small-en-v1.5` embedding model.
 - **Chroma** — a real vector database, deployed on the non-GPU worker, PVC-backed so vectors survive a pod restart.
+- **RAG API** — a small custom service, written in plain Python, that wraps vLLM behind the same `/v1/chat/completions` shape. On every request it embeds the incoming question via TEI, retrieves the closest chunks from Chroma, and forwards a grounded prompt to vLLM — this is what OpenWebUI actually talks to for retrieval-augmented answers.
 - **vLLM** — unchanged from [03-Deploy-LLM-With-vLLM-OpenWebUI](/02-Demos/03-Deploy-LLM-With-vLLM-OpenWebUI/README.md), still on the `4g.71gb` MIG slice, used only for the final answer generation.
 
-The knowledge base is a 10-page fictional company handbook for "AI-Demo-Lab," covering company background, HR policies, IT security, data governance, and support SLAs. A one-off Job chunks the handbook, embeds each chunk through TEI, stores the vectors in Chroma, then embeds an incoming question, retrieves the closest chunks from Chroma, and sends them to vLLM as context for a grounded answer.
+*Note: The manual, step-by-step deployment in this demo is for demo purposes only. In production, you would most likely not run a fixed set of `kubectl apply` commands against a hardcoded local file — you would have a fully automated pipeline pulling source documents from object storage (e.g. S3-compatible storage), with a tool like Kubeflow orchestrating ingestion, chunking, and embedding on a schedule or on new-document triggers, rather than a person running it by hand.*
 
-This is for demo purposes only. **Do not use this in a production environment.**
+*The knowledge base used in this demo (a fictional company handbook) and its chunking strategy (a fixed-size sliding window, written in plain Python) are also for demo purposes only. In production, the source data, chunk size, overlap, and retrieval strategy all need to be worked out from the actual documents and workload, not copied from a demo.*
+
+This guide builds a demo cluster and is not intended for a production environment. This is for demo purposes only. **Do not use this in a production environment.**
+
+---
+
+## Architecture
+
+This demo wires together five pieces, each doing one job:
+
+1. **Chunking and ingestion (Python)** — a plain Python script splits the fictional AI-Demo-Lab handbook into fixed-size, overlapping chunks (no text-splitting library), sends each chunk to the embedding server, and stores the resulting vectors in Chroma. This runs once, as a Kubernetes Job.
+2. **TEI (embedding server)** — Hugging Face's Text Embeddings Inference server, running the `BAAI/bge-small-en-v1.5` model on one of the two `1g.35gb` MIG slices. Converts text into vectors — handbook chunks at ingestion time, questions at query time.
+3. **Chroma (vector database)** — stores the chunk vectors and, given a question's vector, returns the closest matching chunks by similarity search.
+4. **RAG API (Python)** — a small custom service that mimics vLLM's own API shape (`/v1/chat/completions`). On every request it embeds the incoming question via TEI, retrieves the closest chunks from Chroma, builds a prompt containing only those chunks, and forwards it to vLLM.
+5. **vLLM and OpenWebUI** — unchanged from demo 03. vLLM generates the final answer from the augmented prompt; OpenWebUI is the browser interface, configured with two selectable models — the raw `qwen2.5-7b` (no retrieval) and `ai-demo-lab-rag` (retrieval-grounded) — so the two can be compared side by side.
+
+Data flow for a single question, end to end:
+
+```
+Browser (OpenWebUI)
+  -> RAG API (embeds the question via TEI)
+  -> Chroma (returns the closest handbook chunks)
+  -> RAG API (builds a grounded prompt from those chunks)
+  -> vLLM (generates the answer)
+  -> back to OpenWebUI
+```
 
 ---
 
