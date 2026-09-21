@@ -12,6 +12,8 @@ To follow the demos in the main repo, you can use RKE2 or any other Kubernetes d
 
 The focus of this sub-repo is to install and configure a Kubernetes cluster using RKE2, and confirm the cluster is up and running, as preparation for the demo activities in this repo.
 
+This guide uses the [RKE2 quick start script](https://docs.rke2.io/install/quickstart) to bootstrap each node with its required role.
+
 This guide builds a demo cluster and is not intended for a production environment. -- This is for demo purposes only. **Do not use this in a production environment.**
 
 
@@ -127,7 +129,7 @@ exec bash
 
 ### Step 4 — Create the RKE2 config file on the master node
 
-On the master node:
+On the master node, replace `<Node_FQDN>` with the node's FQDN:
 
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
@@ -146,7 +148,7 @@ EOF
 
 ### Step 5 — Create the RKE2 config file on the non-GPU worker node
 
-On the non-GPU worker node, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
+On the non-GPU worker node, replace `<Node_FQDN>` with the node's FQDN, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
 
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
@@ -161,7 +163,7 @@ EOF
 
 ### Step 6 — Create the RKE2 config file on the GPU worker node
 
-On the GPU worker node, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
+On the GPU worker node, replace `<Node_FQDN>` with the node's FQDN, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
 
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
@@ -174,7 +176,7 @@ EOF
 
 ---
 
-### Step 7 — Install RKE2 on the master node
+### Step 7 — Install RKE2 on the master node using the RKE2 quick start script
 
 On the master node:
 
@@ -226,7 +228,7 @@ You should see `kube-ai-demo-master-01` in `Ready` state.
 
 ---
 
-### Step 11 — Install RKE2 on the non-GPU worker node
+### Step 11 — Install RKE2 on the non-GPU worker node using the RKE2 quick start script
 
 On the non-GPU worker node:
 
@@ -250,7 +252,7 @@ sudo systemctl enable rke2-agent.service --now
 
 ---
 
-### Step 13 — Install RKE2 on the GPU worker node
+### Step 13 — Install RKE2 on the GPU worker node using the RKE2 quick start script
 
 On the GPU worker node:
 
