@@ -36,9 +36,9 @@ This demo wires together five pieces, each doing one job:
 
 Data flow for a single question, end to end:
 
-|Browser (OpenWebUI)
-|  - RAG API (embeds the question via TEI)
-|  - Chroma (returns the closest handbook chunks)
+Browser (OpenWebUI)
+  - RAG API (embeds the question via TEI)
+  - Chroma (returns the closest handbook chunks)
   - RAG API (builds a grounded prompt from those chunks)
   - vLLM (generates the answer)
   - back to OpenWebUI
