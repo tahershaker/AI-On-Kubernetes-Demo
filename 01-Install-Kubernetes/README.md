@@ -130,6 +130,8 @@ exec bash
 
 On the master node, replace `<Node_Hostname>` with the node's FQDN:
 
+*You can change `cluster-cidr`, `service-cidr`, and `token` to values of your own — just make sure you use the same token when configuring the worker nodes.*
+
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
 write-kubeconfig-mode: "0644"
@@ -149,6 +151,8 @@ EOF
 
 On the non-GPU worker node, replace `<Node_Hostname>` with the node's FQDN, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
 
+*If you changed the token when configuring the master node, use that same token here.*
+
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
 write-kubeconfig-mode: "0644"
@@ -163,6 +167,8 @@ EOF
 ### Step 6 — Create the RKE2 config file on the GPU worker node
 
 On the GPU worker node, replace `<Node_Hostname>` with the node's FQDN, replace `<MASTER_PRIVATE_IP>` with the master node's private IP:
+
+*If you changed the token when configuring the master node, use that same token here.*
 
 ```bash
 mkdir -p /etc/rancher/rke2/ && cat <<EOF > /etc/rancher/rke2/config.yaml
@@ -195,7 +201,7 @@ On the master node:
 sudo systemctl enable rke2-server.service --now
 ```
 
-This can take a few minutes — Step 10 confirms it's ready.
+> This can take a few minutes — Step 10 confirms it's ready.
 
 ![step8](/01-Install-Kubernetes/Image/step-8.png)
 
